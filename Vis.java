@@ -14,10 +14,10 @@ public class Vis extends JApplet implements ActionListener{
 	final static Color fg = Color.black;
 	Dimension totalSize;
 	public BufferedImage img;
-	public int size=5000;
+	public int size=500;
 	int numParticles=0;
 	int[][] OriginalMatrix;
-	int mag=1; // Magnification factor
+	int mag=2; // Magnification factor
 	public CA ca;
 	int counter=0; // Timesteps counter
 	int defaultView=0; // Cells view
@@ -60,7 +60,7 @@ public class Vis extends JApplet implements ActionListener{
 		paintAll();
 		timestep++;
 
-        if (timestep==1000) ca.chemo=true;
+        //if (timestep==1000) ca.chemo=true;
 	}
 
 

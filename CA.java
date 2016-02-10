@@ -15,7 +15,7 @@ public class CA {
 	Bag cellList=null; // Used in the iterateCells method. Defined here for performance issues
 	boolean finishedRun=false;
 
-	int size = 5000; // Size of the system lattice
+	int size = 500; // Size of the system lattice
 	int timestep=0; // Current Number of timesteps in the simulation
     int births,deaths;
 
@@ -102,8 +102,9 @@ public class CA {
 			for (int j=0;j<size;j++)
 				if (Cells[i][j]) {totalCells++;totalReceptors+=Receptors[i][j];}
 
-			timestep++;
-			System.out.println ("Cells: "+totalCells+" and receptors: "+((float)totalReceptors/totalCells));
+        if (totalCells>=1000000) chemo=true;
+        timestep++;
+        System.out.println ("Cells:\t"+totalCells+" receptors:\t"+((float)totalReceptors/totalCells)+" births:\t"+births+" deaths:\t"+deaths);
 	}
 
 
@@ -120,7 +121,7 @@ public class CA {
 			}
 
 		Cells[centre][centre]=true;
-		Receptors[centre][centre]=30;
+		Receptors[centre][centre]=50;
 	}
 
 	public boolean iterateCells()
