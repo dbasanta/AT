@@ -3,7 +3,7 @@ import java.util.*;
 import static java.lang.Math.*;
 
 public class CA {
-	public static String version="8th Feb 2016";
+	public static String version="11th Feb 2016";
 	MersenneTwisterFast random;
 	public int mag=1;
 	public boolean chemo=false; // By default we are not applying chemo
@@ -15,7 +15,7 @@ public class CA {
 	Bag cellList=null; // Used in the iterateCells method. Defined here for performance issues
 	boolean finishedRun=false;
 
-	int size = 500; // Size of the system lattice
+	int size = 5000; // Size of the system lattice
 	int timestep=0; // Current Number of timesteps in the simulation
     int births,deaths;
 
@@ -94,17 +94,36 @@ public class CA {
 		deaths=0;
 		//for (int i=0;i<100;i++) iterateOxygen();
 		iterateCells();
+        int [] heterogeneity = new int [5];
+        double [] heterogeneity2 = new double [100];
 
 		//NEW
 		int totalCells=0;
 		int totalReceptors=0;
 		for (int i=0;i<size;i++)
 			for (int j=0;j<size;j++)
-				if (Cells[i][j]) {totalCells++;totalReceptors+=Receptors[i][j];}
+				if (Cells[i][j]) {
+                    totalCells++;
+                    totalReceptors+=Receptors[i][j];
+                    heterogeneity2[Receptors[i][j]]+=1.0;
+                    if (Receptors[i][j]<=20) heterogeneity[0]++;
+                    else if (Receptors[i][j]<=40) heterogeneity[1]++;
+                    else if (Receptors[i][j]<=60) heterogeneity[2]++;
+                    else if (Receptors[i][j]<=80) heterogeneity[3]++;
+                    else if (Receptors[i][j]<=100) heterogeneity[4]++;
+                }
 
-        if (totalCells>=1000000) chemo=true;
+        if (totalCells>=1000000) chemo=true; // 1,000,000
         timestep++;
-        System.out.println ("Cells:\t"+totalCells+" receptors:\t"+((float)totalReceptors/totalCells)+" births:\t"+births+" deaths:\t"+deaths);
+        // Shannon index
+        double sindex=0f;
+        //for (int i=0;i<100;i++) sindex+=(heterogeneity2[i]/totalCells)*Math.log(heterogeneity2[i]/totalCells);
+        for (int i=0;i<100;i++) {
+            double tmp= heterogeneity2[i]/totalCells;
+            if (tmp>0) sindex+=tmp*Math.log(tmp);
+        }
+        System.out.println ("Cells\t"+totalCells+"\treceptors\t"+((float)totalReceptors/totalCells)+"\tbirths\t"+births+"\tdeaths\t"+deaths+"\tratio\t"+((float)births/deaths)+"\tShannon\t"+(-sindex));
+        System.err.println ((float)heterogeneity[0]/totalCells+"\t"+(float)heterogeneity[1]/totalCells+"\t"+(float)heterogeneity[2]/totalCells+"\t"+(float)heterogeneity[3]/totalCells+"\t"+(float)heterogeneity[4]/totalCells+"\t"+(-sindex));
 	}
 
 
@@ -121,7 +140,7 @@ public class CA {
 			}
 
 		Cells[centre][centre]=true;
-		Receptors[centre][centre]=50;
+		Receptors[centre][centre]=0;
 	}
 
 	public boolean iterateCells()
@@ -164,6 +183,7 @@ public class CA {
 							int[] daughter = findEmptySite (rI,rJ);
 							Cells[daughter[0]][daughter[1]]=true;
 							Receptors[daughter[0]][daughter[1]]=Receptors[rI][rJ];
+                            births++;
 							// Mutations? 10%
 							if (random.nextFloat()<0.1f) {
 								float f = random.nextFloat();
@@ -174,6 +194,8 @@ public class CA {
 							}
 							if (Receptors[daughter[0]][daughter[1]]<=0) Receptors[daughter[0]][daughter[1]]=1;
 							else if (Receptors[daughter[0]][daughter[1]]>=100) Receptors[daughter[0]][daughter[1]]=100;
+                            else if (Receptors[rI][rJ]<=0) Receptors[rI][rJ]=1;
+                            else if (Receptors[rI][rJ]>=100) Receptors[rI][rJ]=100;
 						}
 				} else if (pMotility>random.nextFloat()) { // Maybe we can try migration?
 						int[] daughter = findEmptySite (rI,rJ);
